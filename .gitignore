@@ -32,3 +32,5 @@ frontend/.env.production.local
 .DS_Store
 Thumbs.db
 .vscode/*.log
+.vercel
+.env*.local
