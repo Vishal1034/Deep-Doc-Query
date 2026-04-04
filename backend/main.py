@@ -42,8 +42,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the RAG chain once at startup
-rag_chain = get_rag_chain()
+rag_chain = None
+
+
+def get_cached_rag_chain():
+    global rag_chain
+    if rag_chain is None:
+        rag_chain = get_rag_chain()
+    return rag_chain
 
 
 class ChatRequest(BaseModel):
@@ -76,7 +82,8 @@ async def clear_chat() -> dict:
 async def chat_streaming(request: ChatRequest):
     async def event_generator():
         try:
-            docs = rag_chain.retriever.invoke(request.message)
+            chain = get_cached_rag_chain()
+            docs = chain.retriever.invoke(request.message)
             context = "\n\n".join([doc.page_content for doc in docs])
             sources = list(set(filter(None, [doc.metadata.get("source") for doc in docs])))
 
@@ -125,7 +132,7 @@ def health_check() -> dict:
 async def chat_endpoint(request: ChatRequest) -> dict:
     try:
         # Invoke the RAG chain
-        response = rag_chain.invoke({"query": request.message})
+        response = get_cached_rag_chain().invoke({"query": request.message})
 
         # Extract sources to show in the UI
         sources = [doc.metadata.get("source") for doc in response["source_documents"]]
