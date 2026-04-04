@@ -2,7 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Send, Bot, User, BookOpen, Plus, MessageSquare, Menu, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+const isLocalhost =
+  typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || (isLocalhost ? "http://localhost:8000" : "/api")
+).replace(/\/$/, "");
 
 function App() {
   const [input, setInput] = useState("");
@@ -144,14 +149,20 @@ function App() {
 
     setUploading(true);
     try {
-      await fetch(`${API_BASE_URL}/upload`, {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
-      alert("File indexed successfully!");
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || payload.message || `Upload failed with status ${response.status}`);
+      }
+
+      alert(payload.message || "File indexed successfully!");
     } catch (err) {
       console.error("Upload failed", err);
-      alert("Failed to index file.");
+      alert(err instanceof Error ? err.message : "Failed to index file.");
     } finally {
       setUploading(false);
       event.target.value = "";

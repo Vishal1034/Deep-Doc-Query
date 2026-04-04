@@ -5,6 +5,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://local-rag-assistant-backend.onrender.com/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

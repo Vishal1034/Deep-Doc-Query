@@ -46,3 +46,5 @@ npm run dev
 ```
 
 Frontend runs on `http://127.0.0.1:5173` and calls backend on `http://127.0.0.1:8000`.
+
+For Vercel deployments, the frontend proxies `/api` to the Render backend through `frontend/vercel.json`, so uploads and chat requests work without a localhost backend. If you override `VITE_API_BASE_URL`, point it at your deployed backend URL.
