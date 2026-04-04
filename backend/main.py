@@ -28,11 +28,16 @@ if raw_cors_origins.strip() == "*":
 else:
     cors_origins = [origin.strip() for origin in raw_cors_origins.split(",") if origin.strip()]
 
+cors_origin_regex = os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.vercel\.app")
+if cors_origins == ["*"]:
+    cors_origin_regex = None
+
 app = FastAPI(title=APP_TITLE)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=cors_origin_regex,
     allow_methods=["*"],
     allow_headers=["*"],
 )
